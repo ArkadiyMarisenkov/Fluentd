@@ -1,0 +1,16 @@
+---
+- name: Change params in /etc/default/grub and grub2-mkconfig
+  hosts: dev_servers
+  become: yes
+
+  tasks:
+  - name: Change lines in grub file
+    lineinfile:
+      state: present
+      dest: /etc/default/grub
+      backrefs: yes
+      regexp: '^(GRUB_CMDLINE_LINUX_DEFAULT=(?!.* biosdevname net.ifnames)\"[^\"]+)(\".*)'
+      line: '\1 biosdevname=0 net.ifnames=0\2'
+
+  - name: Make configuration grub2 after changing grub file
+    shell: grub2-mkconfig 
