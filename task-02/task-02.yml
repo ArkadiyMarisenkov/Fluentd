@@ -11,6 +11,6 @@
         name: "{{ item.key }}"
         home: "{{ item.value.homedir }}"
         comment: "{{ item.value.comment }}"
-        password: "{{ item.value.password }}"
+        password: "{{ item.value.password | password_hash('sha512') }}"
       with_dict: 
         - "{{ users }}" 
