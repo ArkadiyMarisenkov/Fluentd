@@ -1,0 +1,19 @@
+{{ apache_global_vhost_settings }}
+
+{# Set up VirtualHosts #}
+{% for vhost in apache_vhosts %}
+<VirtualHost {{ apache_listen_ip }}:{{ apache_listen_port }}>
+  ServerName {{ vhost.servername }}
+  ServerAdmin {{ vhost.serveradmin }}
+  <Directory "{{ vhost.documentroot }}">
+    AllowOverride {{ vhost.allow_override | default(apache_allow_override) }}
+    Order allow,deny
+    Allow from all
+    Require all granted
+  </Directory>
+</VirtualHost>
+
+{% endfor %}
+
+
+

@@ -1,0 +1,19 @@
+---
+- name: Include my vars
+  include_vars: CentOs.yml
+
+- name: Define apache_packages.
+  set_fact:
+    apache_packages: "{{ __apache_packages | list }}"
+  when: apache_packages is not defined
+
+- name: Install Web server Apache for RHEL family OS
+  import_tasks: redhat-install.yml
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Configure Web server Apache for RHEL family OS
+  import_tasks: redhat-conf.yml 
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Create index.html file for Web Server
+  import_tasks: additional-config.yml 
