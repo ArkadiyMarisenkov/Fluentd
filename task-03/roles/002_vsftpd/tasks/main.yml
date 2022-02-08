@@ -1,0 +1,29 @@
+# roles/vsftpd/tasks/main.yml
+---
+- include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Install ftp server vsftpd
+  import_tasks: redhat-install.yml
+  when: ansible_facts['os_family'] == "RedHat"
+
+- name: Configure vsftpd
+  import_tasks: additional-config.yml
+
+
+- name: Configure selinux for right working
+  import_tasks: selinux.yml
+  when: ansible_facts['os_family'] == "RedHat"
+
+# - name: Ensure `anon_root` exists
+#  file:
+#    path: '{{ vsftpd_anon_root }}'
+#    state: directory
+#    owner: '{{ vsftpd_owner }}'
+#    group: '{{ vsftpd_group }}'
+#    mode: '{{ vsftpd_mode }}'
+#    setype: '{{ vsftpd_setype }}'
+#  when: vsftpd_anon_root is defined
+
+
+
+

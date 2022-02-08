@@ -1,0 +1,15 @@
+# roles/vsftpd/vars/RedHat.yml
+---
+
+vsftpd_packages:
+  - vsftpd
+
+vsftpd_service: vsftpd
+
+vsftpd_service_state: started
+vsftpd_package_state: present
+
+vstfpd_rest_service_state: restarted
+
+
+vsftpd_config_file: /etc/vsftpd/vsftpd.conf

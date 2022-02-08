@@ -1,0 +1,17 @@
+---
+- include_vars: "{{ ansible_os_family }}.yml"
+  tags: vsftpd
+
+- name: Install Vsftpd
+  package:
+    name: "{{ vsftpd_packages }}"
+    state: "{{ vsftpd_package_state }}"
+  tags: vsftpd
+
+- name: Ensure service is started
+  service:
+    name: "{{ vsftpd_service }}"
+    state: "{{ vsftpd_service_state }}"
+    enabled: true
+  tags: vsftpd
+

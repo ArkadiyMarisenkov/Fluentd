@@ -1,7 +1,7 @@
 ---
 - name: Copy content file index.html
   ansible.builtin.copy:
-    src: "{{ role.path }}/files/index.html"
+    src: "{{ role_path }}/files/index.html"
     dest: /var/www/html/index.html
     owner: "{{ apache_def_user }}"
     group: "{{ apache_def_user }}"

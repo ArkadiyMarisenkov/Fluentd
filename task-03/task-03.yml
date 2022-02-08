@@ -1,8 +1,9 @@
 ---
-- name: use my local httpd role
+- name: use my local httpd and vsftpd roles
   hosts: dev_servers
   become: yes
 
   roles:
   - role: 001_httpd
-    
+  
+  - role: 002_vsftpd  

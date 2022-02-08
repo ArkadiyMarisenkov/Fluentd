@@ -4,7 +4,6 @@
 {% for vhost in apache_vhosts %}
 <VirtualHost {{ apache_listen_ip }}:{{ apache_listen_port }}>
   ServerName {{ vhost.servername }}
-  ServerAdmin {{ vhost.serveradmin }}
   <Directory "{{ vhost.documentroot }}">
     AllowOverride {{ vhost.allow_override | default(apache_allow_override) }}
     Order allow,deny

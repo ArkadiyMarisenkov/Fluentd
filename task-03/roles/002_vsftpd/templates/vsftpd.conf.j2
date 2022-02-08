@@ -1,0 +1,26 @@
+
+connect_from_port_20={{ 'YES' if vsftpd_connect_from_port_20 else 'NO' }}
+
+listen={{ 'YES' if vsftpd_listen else 'NO' }}
+listen_port={{ vsftpd_listen_port }}
+pam_service_name={{ vsftpd_service }} 
+
+anonymous_enable={{ 'YES' if vsftpd_anonymous_enable else 'NO' }}
+
+{% if vsftpd_anon_root is defined %}
+anon_root={{ vsftpd_anon_root }}
+{% endif %}
+
+ftp_data_port={{ vsftpd_ftp_data_port  }}
+anon_upload_enable={{ 'YES' if vsftpd_anon_upload_enable else 'NO' }}
+local_enable={{ vsftpd_local_enable }}
+
+no_anon_password=YES
+
+local_umask={{ vsftpd_local_umask }}
+
+write_enable={{ 'YES' if vsftpd_write_enable else 'NO' }}
+
+pasv_enable={{ vsftpd_passive_mode  }}
+pasv_max_port={{ vsftpd_passvie_port_max  }}
+pasv_min_port={{ vsftpd_passive_port_min }}

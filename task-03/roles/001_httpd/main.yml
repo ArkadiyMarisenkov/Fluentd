@@ -1,7 +1,0 @@
----
-- name: use my local httpd role
-  hosts: all
-  become: yes
-
-  roles:
-    
