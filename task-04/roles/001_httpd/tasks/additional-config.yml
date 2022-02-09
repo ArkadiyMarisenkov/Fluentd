@@ -1,0 +1,18 @@
+---
+- name: Copy content file index.html
+  ansible.builtin.copy:
+    src: "{{ role_path }}/files/index.html"
+    dest: /var/www/html/index.html
+    owner: "{{ apache_def_user }}"
+    group: "{{ apache_def_user }}"
+    mode: '0644'
+  become: yes
+  notify: Restart Apache
+
+- name: Configure firewalld for Apache
+  firewalld:
+    zone: public
+    port: http/tcp
+    permanent: true
+    state: enabled
+ 
