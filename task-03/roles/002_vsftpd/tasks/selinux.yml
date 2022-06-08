@@ -1,0 +1,12 @@
+# roles/vsftpd/tasks/selinux.yml
+---
+
+- name: Set SElinux boolean for Anonymous FTP upload 
+  seboolean:
+    name: "{{ vsftpd_setype }}"
+    state: true
+    persistent: yes
+  when:
+   - ansible_os_family == 'RedHat'
+   - ansible_distribution_major_version >= "7"
+

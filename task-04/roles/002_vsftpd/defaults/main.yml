@@ -1,0 +1,19 @@
+---
+vsftpd_anonymous_enable: true
+vsftpd_connect_from_port_20: true
+vsftpd_group: ftp
+vsftpd_listen: true
+vsftpd_listen_port: 21
+vsftpd_local_enable: false
+vsftpd_local_umask: '022'
+vsftpd_mode: '0777'
+vsftpd_owner: ftp
+vsftpd_anon_upload_enable: true
+vsftpd_setype: "ftpd_anon_write"
+vsftpd_write_enable: true
+vsftpd_anon_root: /var/ftp/pub
+vsftpd_ftp_data_port: 20
+
+vsftpd_passive_mode: true
+vsftpd_passive_port_min: 10090
+vsftpd_passvie_port_max: 10100
