@@ -1,0 +1,13 @@
+# roles/vsftpd/handlers/main.yml
+---
+
+- name: restart vsftpd
+  service:
+    name: "{{ vsftpd_service }}"
+    state: restarted
+
+- name: reload firewalld
+  systemd:
+    name: firewalld
+    state: reloaded
+

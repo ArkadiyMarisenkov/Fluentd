@@ -1,0 +1,11 @@
+---
+- name: Configure Apache Web-server
+  template:
+    src: templates/vhosts.conf.j2
+    dest: /etc/httpd/conf.d/web-server.conf
+    owner: "{{ apache_def_user  }}" 
+    group: "{{ apache_def_user }}"
+    mode: 0644
+  become: yes
+  notify: Restart Apache
+

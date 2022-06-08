@@ -1,0 +1,42 @@
+---
+- name: Install configuration file
+  template:
+    src:  vsftpd.conf.j2
+    dest: "{{ vsftpd_config_file }}"
+    mode: '0600'
+  notify: restart vsftpd
+  tags: vsftpd
+
+
+- name: Configure firewalld for FTP
+  firewalld:
+    zone: public
+    port: "{{ item }}"
+    permanent: yes
+    state: enabled
+  notify: reload firewalld
+  loop:
+    - 20-21/tcp
+    - 10090-10100/tcp
+
+- name: Create `upload` directory
+  ansible.builtin.file:
+    path: /var/ftp/pub/upload/
+    state: directory
+    mode: "{{ vsftpd_mode }}"
+    owner: ftp
+    group: ftp
+    recurse: yes
+  become: yes
+  notify: restart vsftpd
+
+
+- name: Allow to write files in /var/ftp/pub/upload
+  sefcontext:  
+    target: "/var/ftp/pub/upload(/.*)?"
+    setype: public_content_rw_t
+    state: "{{ vsftpd_package_state  }}"
+
+- name: run restorecon
+  command: restorecon -v /var/ftp/pub/upload
+

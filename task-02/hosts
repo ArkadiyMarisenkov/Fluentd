@@ -1,0 +1,7 @@
+[dev_servers]
+node1.example.com 
+node2.example.com
+
+[dev_servers:vars]
+ansible_user=ansible
+ansible_ssh_private_key_file=/home/ansible/.ssh/id_rsa
