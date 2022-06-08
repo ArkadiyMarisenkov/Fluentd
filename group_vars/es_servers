@@ -1,0 +1,3 @@
+---
+ansible_user: user
+ansible_ssh_prive_key_file: /home/natig2992/.ssh/my-rebrain-ssh-pem-private.pem
