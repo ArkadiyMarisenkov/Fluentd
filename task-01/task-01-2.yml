@@ -1,0 +1,20 @@
+---
+- name: Delete Apache Web Server, close ports, remove index.html
+  hosts: dev_servers
+  become: yes
+
+  tasks:
+  - name: Delete Apache Web Server
+    yum: name=httpd state=absent
+  
+  - name: Remove index.html
+    ansible.builtin.file:
+      path: /var/www/html/index.html
+      state: absent 
+
+  - name: Close http port
+    firewalld:
+      zone: public
+      port: http/tcp
+      permanent: true
+      state: disabled

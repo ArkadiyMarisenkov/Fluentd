@@ -1,0 +1,31 @@
+---
+- name: Install and configure Apache Web Server
+  hosts: dev_servers
+  become: yes
+
+  
+  tasks:
+  - name: Install Apache Web Server
+    yum: name=httpd state=latest
+  
+  - name: Start enable and check httpd service
+    service: name=httpd state=started enabled=yes 
+  
+  - name: populate service facts
+    service_facts:
+      
+  - name: try to work out how to access the service
+    debug:
+       var: ansible_facts.services["httpd.service"]
+  
+  - name: index html file with content
+    copy:
+      dest: "/var/www/html/index.html"
+      content: "Welcome to my web server"
+  
+  - name: Allow new incoming packets on TCP port 80
+    firewalld:
+        zone: public
+        port: http/tcp
+        permanent: true
+        state: enabled

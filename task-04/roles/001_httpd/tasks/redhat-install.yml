@@ -1,0 +1,12 @@
+---
+- name: Install web server
+  yum:
+    name: "{{ apache_service }}"
+    state: "{{  apache_packages_state }}"
+
+- name: Start and Enable Apache service
+  ansible.builtin.service:
+    name: "{{ apache_service }}" 
+    state: "{{ apache_state }}"
+    enabled: "{{ apache_enabled }}" 
+  
