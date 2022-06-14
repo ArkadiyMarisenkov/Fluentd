@@ -1,0 +1,8 @@
+---
+- name: Test Connection to my servers
+  hosts: all
+  become: yes
+
+  tesks:
+  - name: Ping all LOGS08 servers
+    ping:

@@ -1,0 +1,31 @@
+---
+- name: Install Java and ES and configure ES nodes
+  hosts: es_servers
+  become: yes
+
+  vars:
+    node_name_1: rebrain-es-node-1
+    node_name_2: rebrain-es-node-2
+    node_name_2: rebrain-es-node-3
+
+  tasks:
+  - name: import the elasticsearch apt key
+    apt_key:
+      url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      state: present
+  
+  - name: Add ES repository
+    apt_repository:
+      repo: deb https://artifacts.elastic.co/packages/8.x/apt stable main
+      state: present 
+  
+  - name: Install Java and ES
+    apt:
+      name: "{{ item }}"
+      state: latest
+      update_cache: yes
+    loop:
+     - apt-transport-https
+     - default-jre
+     - elasticsearch
+    
