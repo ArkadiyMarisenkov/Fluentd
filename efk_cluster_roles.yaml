@@ -1,0 +1,12 @@
+---
+- hosts: es_servers
+  roles: 
+    - elasticsearch
+  tags: elastic  
+  vars:
+
+- hosts: ['app_servers', 'fluentd_server']
+  roles: 
+    - fluentd-rsyslog
+  tags: fluentd  
+  vars:

@@ -1,0 +1,15 @@
+
+#                 For more information see rsyslog.conf(5) and /etc/rsyslog.conf
+auth,authpriv.*                 /var/log/auth.log
+*.*;auth,authpriv.none          -/var/log/syslog
+#cron.*                         /var/log/cron.log
+#daemon.*                       -/var/log/daemon.log
+kern.*                          -/var/log/kern.log
+#lpr.*                          -/var/log/lpr.log
+mail.*                          -/var/log/mail.log
+#user.*                         -/var/log/user.log
+
+
+*.emerg                         :omusrmsg:*
+
+syslog.*                        @{{ ansible_eth1.ipv4.address }}:5140

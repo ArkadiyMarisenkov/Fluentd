@@ -1,0 +1,150 @@
+---
+  # Prepare node for install ES
+- name: Increase max open files to 65536
+  pam_limits:
+    domain: '*'
+    limit_type: '-'
+    limit_item: nofile
+    value: 65536
+
+
+- name: Decrease swappines to '1'
+  sysctl:
+    name: vm.swappiness
+    value: '1'
+    state: present
+    reload: yes
+
+- name: Increase vm.max_map_count to '262144'
+  sysctl:
+    name: vm.max_map_count
+    value: '262144'
+    state: present
+    reload: yes
+
+#Disable ipv6
+- name: net.ipv6.conf.all.disable_ipv6 to '1'
+  sysctl:
+    name: net.ipv6.conf.all.disable_ipv6
+    value: '1'
+    state: present
+    sysctl_set: yes
+    reload: yes
+
+- name: net.ipv6.conf.default.disable_ipv6 to '1'
+  sysctl:
+    name: net.ipv6.conf.default.disable_ipv6
+    value: '1'
+    sysctl_set: yes
+    state: present
+    reload: yes
+  
+- name: net.ipv6.conf.lo.disable_ipv6 to '1'
+  sysctl:
+    name: net.ipv6.conf.lo.disable_ipv6
+    value: '1'
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+ #Update apt, install and configure ES
+
+- name: import the elasticsearch apt key
+  apt_key:
+    url: https://artifacts.elastic.co/GPG-KEY-elasticsearch
+    state: present
+      
+- name: Add ES repository
+  apt_repository:
+    repo: deb https://artifacts.elastic.co/packages/8.x/apt stable main
+    state: present 
+
+- name: Install Java and ES
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: yes
+  loop:
+  - apt-transport-https
+  - default-jre
+  - elasticsearch
+  - jq
+
+- name: Copy a "elasticsearch.yml" to elasticsearch.config.yml (backup_original)
+  ansible.builtin.copy:
+    src: /etc/elasticsearch/elasticsearch.yml
+    dest: /etc/elasticsearch/elasticsearch.config.yml
+    remote_src: yes
+
+- name: Templates elasticsearch.config.yml to /etc/elasticsearch/elasticsearch.yml
+  ansible.builtin.template:
+    src: templates/es-config.yaml.j2
+    dest: /etc/elasticsearch/elasticsearch.yml
+    owner: root
+    group: root
+    mode: '0664'
+
+- name: Copy a "heap_size" to /etc/elasticsearch/jvm.options.d/heap_size
+  ansible.builtin.template:
+    src: templates/heap_size.j2
+    dest: /etc/elasticsearch/jvm.options.d/heap_size
+
+# Prevent SplitBrain, starting services is needed with right orded
+
+- name: Start rebrain-es-node-1
+  ansible.builtin.systemd:
+    state: started
+    name: elasticsearch
+    enabled: yes
+  when: ansible_nodename == "es01"
+
+- name: Pause for 5 seconds
+  pause:
+    seconds: 5
+
+- name: Start rebrain-es-node-2
+  ansible.builtin.systemd:
+    state: started
+    name: elasticsearch
+    enabled: yes
+  when: ansible_nodename == "es02"
+
+- name: Pause for 5 seconds
+  pause:
+    seconds: 5
+
+- name: Start rebrain-es-node-3
+  ansible.builtin.systemd:
+    state: started
+    name: elasticsearch
+    enabled: yes
+  when: ansible_nodename == "es03"
+
+# Check that the ES running on all nodes
+- name: Check ES running on nodes
+  ansible.builtin.command: systemctl status elasticsearch
+  register: status
+
+- name: Show status ES on nodes
+  debug:
+    msg: "{{ status.stdout }}"
+
+# Create indices for applogs and syslogs
+
+- name: Create applogs index
+  uri:
+    url: http://{{ hostvars[groups['es_servers'][0]]['ansible_eth1']['ipv4']['address'] }}:9200/applogs
+    method: PUT
+    body: '{"settings" : {"index" : {"number_of_shards" : 3, "number_of_replicas" : 2 }}}'
+    body_format: json
+  when: ansible_nodename == "es01" 
+  notify: Restart ES
+
+- name: Create syslogs index
+  uri:
+    url: http://{{ hostvars[groups['es_servers'][0]]['ansible_eth1']['ipv4']['address'] }}:9200/syslogs
+    method: PUT
+    body: '{"settings" : {"index" : {"number_of_shards" : 3, "number_of_replicas" : 2 }}}'
+    body_format: json
+  when: ansible_nodename == "es01"
+  notify: Restart ES

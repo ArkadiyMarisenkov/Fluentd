@@ -1,0 +1,104 @@
+---
+# Prepare system with grant access(install acl) and Install td-agent(fluentd)
+
+- name: Wait for automatic system updates to complete
+  shell: while lsof /var/lib/dpkg/lock-frontend ; do sleep 10; done;
+
+- name: Update repositories cache and install acl
+  apt:
+    name: acl
+    state: present
+    update_cache: True
+
+- name: Install Fluentd on Ubuntu Focal
+  ansible.builtin.shell: curl -fsSL https://toolbelt.treasuredata.com/sh/install-ubuntu-focal-td-agent4.sh | sh
+  args:
+    creates: /etc/td-agent/td-agent.conf
+  tags: fluentd
+
+
+- name: Sets default ACL read permissions for fluentd on /var/log/ recursively
+  ansible.builtin.shell: setfacl -R -m u:td-agent:rx /var/log/
+    
+- name: Grant user td-agent read access /var/log/syslog
+  acl:
+    path: /var/log/syslog
+    entity: td-agent
+    etype: user
+    permissions: rwx
+    state: present
+
+# Configure rsyslog on fluentd and app servers
+- name: Generate template for rsyslog
+  ansible.builtin.copy:
+    src: files/rsyslog.conf
+    dest: /etc/rsyslog.conf
+    owner: root
+    group: root
+    mode: '0664'
+  
+
+- name: Add config template for rsyslog on fluentd server-new
+  ansible.builtin.template:
+     src: templates/rsyslog.50-def.conf.fluentd.j2
+     dest: /etc/rsyslog.d/50-default.conf
+     owner: root
+     group: root
+     mode: '0664'
+  notify: Restart Rsyslog
+  when: ansible_nodename == "fluentd"
+  tags: fluentd
+
+- name: Add config template for rsyslog on app servers
+  ansible.builtin.template:
+     src: templates/rsyslog.50-def.conf.j2
+     dest: /etc/rsyslog.d/50-default.conf
+     owner: root
+     group: root
+     mode: '0664'
+  notify: Restart Rsyslog
+  when: ansible_nodename is regex ("^app*")
+ 
+- name: Copy template FLUENTD-CONF for app servers
+  ansible.builtin.template:
+    src: templates/td-agent.apps.conf.j2
+    dest: /etc/td-agent/td-agent.conf
+    owner: root
+    group: root
+    mode: '0664'
+  notify: Restart Fluentd
+  when: ansible_nodename is regex ("^app*")
+  tags: fluentd
+
+- name: Copy template FLUENTD-CONF for app servers
+  ansible.builtin.template:
+    src: templates/td-agent.fluentd.conf.j2
+    dest: /etc/td-agent/td-agent.conf
+    owner: root
+    group: root
+    mode: '0664'
+  notify: Restart Fluentd
+  when: ansible_nodename == "fluentd"
+  tags: fluentd
+
+# Create auto-log-generate script for applogs
+
+- name: Copy log_generator.sh file for generate applogs 
+  ansible.builtin.copy:
+    src: files/log_generator.sh
+    dest: /tmp/log_generator.sh
+    owner: root
+    group: root
+    mode: '0777'
+  when: ansible_nodename is regex ("^app*")
+  tags: fluentd
+
+# Create cron task for script execute
+
+- name: Cron task for log_generator
+  ansible.builtin.cron:
+    name: "run log genetator"
+    minute: "*"
+    job: "/tmp/log_generator.sh"
+  when: ansible_nodename is regex ("^app*")
+  tags: fluentd

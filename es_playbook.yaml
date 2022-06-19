@@ -3,15 +3,11 @@
   hosts: all
   become: yes
 
-  vars:
-    node_name_1: rebrain-es-node-1
-    node_name_2: rebrain-es-node-2
-    node_name_3: rebrain-es-node-3
-
 
   tasks:
-
   - block: ######### Block for ES #############
+      - name: Prepare ES conf_1 - change sysctl.conf
+
 
       - name: import the elasticsearch apt key
         apt_key:
@@ -32,7 +28,7 @@
         - apt-transport-https
         - default-jre
         - elasticsearch
-    
+      
     when: ansible_nodename is regex ("^es*")
 
   handlers:

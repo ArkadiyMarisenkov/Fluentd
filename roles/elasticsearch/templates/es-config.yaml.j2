@@ -1,0 +1,30 @@
+cluster.name: rebrain-es-cluster
+node.name: rebrain-es-node-{{ ansible_nodename }}
+{% if ansible_nodename == "es02" -%}
+node.roles: [ data, master, voting_only ]
+{% else %} 
+node.roles: [ data, master ]
+{% endif %} 
+network.host: {{ ansible_eth1.ipv4.address }}
+http.port: 9200
+discovery.seed_hosts: ["{{ hostvars[groups['es_servers'][0]]['ansible_eth1']['ipv4']['address'] }}", "{{ hostvars[groups['es_servers'][1]]['ansible_eth1']['ipv4']['address'] }}","{{ hostvars[groups['es_servers'][2]]['ansible_eth1']['ipv4']['address'] }}"]
+
+{% if ansible_nodename == "es01" -%}
+discovery.type: multi-node
+cluster.initial_master_nodes: ["rebrain-es-node-es01"]
+{% else %}
+  
+{% endif %} 
+path.data: /var/lib/elasticsearch
+
+path.logs: /var/log/elasticsearch
+
+xpack.security.enabled: false
+
+xpack.security.enrollment.enabled: false
+
+xpack.security.http.ssl:
+  enabled: false
+  
+xpack.security.transport.ssl:
+  enabled: false

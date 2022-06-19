@@ -1,0 +1,31 @@
+<source>
+  @type syslog
+  port 5140
+  bind {{ ansible_eth1.ipv4.address }}
+  tag syslogs.{{ ansible_nodename }}
+</source>
+
+<source>
+  @type http
+  port 8080
+  bind 0.0.0.0
+  tag applogs.{{ ansible_hostname }}
+</source>
+
+<filter **>
+ @type record_transformer
+  enable_ruby true
+  <record>
+    hostname "#{Socket.gethostname}"
+    tag ${tag}.{{ ansible_hostname }}
+    @timestamp ${time.strftime('%Y-%m-%dT%H:%M:%S')} #"2021-04-16T18:52:03"
+  </record>
+</filter>
+
+<match **>
+@type forward
+  <server>
+    host {{ hostvars[groups['fluentd_server'][0]]['ansible_eth1']['ipv4']['address'] }}
+    port 24224
+  </server>
+</match>

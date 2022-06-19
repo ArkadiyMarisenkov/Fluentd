@@ -1,0 +1,46 @@
+<source>
+  @type syslog
+  port 5140
+  bind {{ ansible_eth1.ipv4.address }}
+  tag syslogs.agregator
+</source>
+
+<source>
+  @type forward
+  port 24224
+  bind {{ ansible_eth1.ipv4.address }}
+</source>
+
+<match syslogs.**>
+    @type elasticsearch
+    hosts {{ hostvars[groups['es_servers'][0]]['ansible_eth1']['ipv4']['address'] }}:9200,{{ hostvars[groups['es_servers'][1]]['ansible_eth1']['ipv4']['address'] }}:9200,{{ hostvars[groups['es_servers'][2]]['ansible_eth1']['ipv4']['address'] }}:9200
+    include_tag_key true
+    tag_key @log_name
+    index_name syslogs
+    <buffer tag,time>
+        @type memory
+        flush_at_shutdown true
+        flush_mode interval
+        flush_interval 30s
+        timekey 1d
+    </buffer>
+</match>
+
+<match applogs.**>
+    @type elasticsearch
+    hosts {{ hostvars[groups['es_servers'][0]]['ansible_eth1']['ipv4']['address'] }}:9200,{{ hostvars[groups['es_servers'][1]]['ansible_eth1']['ipv4']['address'] }}:9200,{{ hostvars[groups['es_servers'][2]]['ansible_eth1']['ipv4']['address'] }}:9200
+    include_tag_key true
+    tag_key @log_name
+    index_name applogs
+    <buffer tag,time>
+        @type memory
+        flush_at_shutdown true
+        flush_mode interval
+        flush_interval 30s
+        timekey 1d
+    </buffer>
+</match>
+
+<match **>
+@type stdout
+</match>

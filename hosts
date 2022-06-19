@@ -1,23 +1,20 @@
 [es_servers]
-es01 ansible_host=134.209.204.235  
-es02 ansible_host=134.209.202.151
-es03 ansible_host=188.166.105.214
+es01 ansible_host=134.122.53.215
+es02 ansible_host=134.122.63.246
+es03 ansible_host=164.92.147.113
 
 [app_servers]
-app01 ansible_host=206.189.96.232  
-app02 ansible_host=134.209.204.183 
+app01 ansible_host=157.245.64.16
+app02 ansible_host=167.172.35.9
 
 [fluentd_server]
-fluentd01 ansible_host=178.128.242.160
+fluentd ansible_host=134.122.61.232
 
 [es_servers:vars]
-#ansible_user=user
-#ansible_ssh_private_key_file=/root/.ssh/my-rebrain-ssh-pem-private.pem
-
+node_number=1
+node_number=2
+node_number=3
 [app_servers:vars]
-#ansible_user=user
-#ansible_ssh_private_key_file=/root/.ssh/my-rebrain-ssh-pem-private.pem
 
 [fluentd_server:vars]
-#ansible_user=user
-#ansible_ssh_private_key_file=/root/.ssh/my-rebrain-ssh-pem-private.pem
+
